@@ -1,0 +1,32 @@
+import csv
+import xml.etree.ElementTree as ET
+
+def read_urls_from_csv(file_path):
+    urls = []
+    with open(file_path, 'r') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            if row:
+                urls.append(row[0])
+    return urls
+
+def generate_sitemap(urls):
+    sitemap = ET.Element('urlset', xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+
+    for url in urls:
+        url_elem = ET.SubElement(sitemap, 'url')
+        loc_elem = ET.SubElement(url_elem, 'loc')
+        loc_elem.text = url
+
+    tree = ET.ElementTree(sitemap)
+    tree.write('sitemap.xml', encoding='utf-8', xml_declaration=True)
+
+def generate_sitemap_from_csv(csv_file_path):
+    urls = read_urls_from_csv(csv_file_path)
+    generate_sitemap(urls)
+
+# Specify the path to your CSV file
+csv_file_path = 'path/to/your/file.csv'
+
+# Generate sitemap.xml from CSV file
+generate_sitemap_from_csv(csv_file_path)
