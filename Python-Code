@@ -1,32 +1,44 @@
 import csv
-import xml.etree.ElementTree as ET
+import datetime
 
-def read_urls_from_csv(file_path):
-    urls = []
-    with open(file_path, 'r') as csv_file:
-        csv_reader = csv.reader(csv_file)
-        for row in csv_reader:
-            if row:
-                urls.append(row[0])
-    return urls
+def generate_sitemap(csv_file):
+    # Set the desired values for the sitemap
+    last_modification_date = datetime.date(2023, 5, 21)
+    change_frequency = "daily"
+    priority = "1.0"
 
-def generate_sitemap(urls):
-    sitemap = ET.Element('urlset', xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    # Initialize the sitemap XML content
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
-    for url in urls:
-        url_elem = ET.SubElement(sitemap, 'url')
-        loc_elem = ET.SubElement(url_elem, 'loc')
-        loc_elem.text = url
+    # Read the CSV file
+    with open(csv_file, 'r') as file:
+        reader = csv.reader(file)
 
-    tree = ET.ElementTree(sitemap)
-    tree.write('sitemap.xml', encoding='utf-8', xml_declaration=True)
+        # Skip the header row if present
+        next(reader)
 
-def generate_sitemap_from_csv(csv_file_path):
-    urls = read_urls_from_csv(csv_file_path)
-    generate_sitemap(urls)
+        # Iterate over the rows in the CSV file
+        for row in reader:
+            # Get the URL from the CSV row
+            url = row[0]
 
-# Specify the path to your CSV file
-csv_file_path = 'path/to/your/file.csv'
+            # Add the URL to the sitemap XML content with the desired values
+            sitemap_xml += f'\t<url>\n'
+            sitemap_xml += f'\t\t<loc>{url}</loc>\n'
+            sitemap_xml += f'\t\t<lastmod>{last_modification_date.strftime("%Y-%m-%d")}</lastmod>\n'
+            sitemap_xml += f'\t\t<changefreq>{change_frequency}</changefreq>\n'
+            sitemap_xml += f'\t\t<priority>{priority}</priority>\n'
+            sitemap_xml += f'\t</url>\n'
 
-# Generate sitemap.xml from CSV file
-generate_sitemap_from_csv(csv_file_path)
+    # Close the sitemap XML content
+    sitemap_xml += '</urlset>'
+
+    # Save the sitemap XML to a file named sitemap.xml
+    with open('sitemap.xml', 'w') as file:
+        file.write(sitemap_xml)
+
+    print("Sitemap generated successfully.")
+
+# Call the function and pass the path to the CSV file
+generate_sitemap('your_csv_file.csv')
